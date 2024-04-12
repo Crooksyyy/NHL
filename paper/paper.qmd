@@ -12,7 +12,8 @@ format: pdf
 number-sections: true
 bibliography: references.bib
 ---
-
+https://www.hockey-reference.com/friv/current_nhl_salaries.cgi
+https://www.nhl.com/stats/skaters
 ```{r}
 #| include: false
 #| warning: false
@@ -183,11 +184,11 @@ pp_check(first_model) +
   theme_classic() +
   theme(legend.position = "bottom")
 
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
+#posterior_vs_prior(first_model) +
+#  theme_minimal() +
+#  scale_color_brewer(palette = "Set1") +
+#  theme(legend.position = "bottom") +
+#  coord_flip()
 ```
 
 ## Diagnostics

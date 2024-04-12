@@ -10,20 +10,19 @@ library(tidyverse)
 library(arrow)
 
 #### Clean data ####
-raw_data <- read_csv("~/NHL/data/raw_data/Two truths and one lie (Responses) - Form responses 1.csv")
+merged_raw_data <- read_csv("data/raw_data/merged_raw_data.csv")
 
-cleaned_data <-
-  raw_data |>
-  janitor::clean_names() |>
-  select(-timestamp) |>
-  rename(c(certainty = how_certain_about_your_guess_are_you,
-           outcome = what_was_the_outcome)) |> 
-  mutate(
-    outcome = if_else(outcome == "Guessed right",
-                      1,
-                      0))
+# Selecting only the required columns 
+cleaned_data <- merged_raw_data[, c("Player", "Pos", "GP", "G", "A", "P", "+/-", "P/GP", "TOI/GP", "Salary", "Cap Hit")]
+
+# Rename the columns for better readability
+names(cleaned_data) <- c("Player", "Position", "GamesPlayed", "Goals", "Assists", "Points", "PlusMinus", "PointsPerGame", "TimeOnIcePerGame", "Salary", "CapHit")
+
+# Drop rows with missing data
+cleaned_data <- na.omit(cleaned_data)
 
 
 #### Save data ####
 write_parquet(cleaned_data, "data/analysis_data/analysis_data.parquet")
 
+write_csv(cleaned_data,"data/analysis_data/analysis_data.csv")
