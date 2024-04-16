@@ -20,6 +20,8 @@ https://www.nhl.com/stats/skaters
 #| message: false
 
 library(tidyverse)
+library(arrow)
+library(here)
 library(palmerpenguins)
 ```
 
@@ -34,45 +36,57 @@ The remainder of this paper is structured as follows. @sec-data....
 
 # Data {#sec-data}
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+The data in this paper was obtained from the NHL official website and hockey-reference(site). The dataset consists of 448 NHL players, their position, games played, goals, assists, points, plus/minus, points per game, time on ice per game, salary and their cap hit. These variables were chosen as they are generally easy to understand as a measure of how good a player is. With the goal of this paper in mind, there needs to be a measure of how productive the player is and how much they are paid. In the NHL there are two different measures of how much a player is paid, salary which measures the overall compensation a players gets paid, and cap hit which measures how much of the salary limit the player gets paid. These values can be different for a number of reasons such as bonuses or having a two-way contract with both the NHL team and its affiliated minor league teams. 
 
 ```{r}
-#| label: fig-bills
+#| label: fig-points-scatter 
 #| fig-cap: Bills of penguins
 #| echo: false
 
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
+analysis_data <- read_parquet(here::here("data/analysis_data/analysis_data.parquet"))
+
+
+# Scatter plot for Points vs. Salary
+ggplot(analysis_data, aes(x = Points, y = Salary)) +
+  geom_point() +
+  labs(title = "Points vs. Salary",
+       x = "Points",
+       y = "Salary")
+
+# Scatter plot for Points vs. Cap Hit
+ggplot(analysis_data, aes(x = Points, y = CapHit)) +
+  geom_point() +
+  labs(title = "Points vs. Cap Hit",
+       x = "Points",
+       y = "Cap Hit")
+
+
 ```
 
-Talk more about it.
-
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
+@fig-points-scatter illustrates a naive approach to analyze how much a player should or should not be paid. Based on this approach players on the bottum right corner are producing lots of points and are relatively underpaid. The players in the top right are highly paid and producing like they should be. Players in the top left would be considered overpaid as they are not scoring but are highly paid. Scoring is not the only things that describes how good a player is. Specifically this approach is flawed for measuring how valuable defense man are. Because of this other measures can be used, one of the simplest is a players plus/minus. A plus is obtained if you are on the ice when your team scores and a minus when the other team scores.  
 
 ```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
+#| label: fig-plusminus
+#| fig-cap: Bills of penguins
 #| echo: false
-#| warning: false
-#| message: false
 
-analysis_data <- read_csv(here::here("data/analysis_data/analysis_data.csv"))
 
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
+# Define a threshold for highlighting players with lots of points
+points_threshold <- 75  # You can adjust this threshold as needed
+
+# Create the scatter plot with point size based on Points
+ggplot(analysis_data, aes(x = PlusMinus, y = Salary, color = Position, size = Points > points_threshold)) +
+  geom_point(alpha = 0.7) +  # Adjust transparency for better visualization
+  scale_size_manual(values = c(1, 3)) +  # Adjust size of points
+  labs(title = "PlusMinus vs. Salary (Highlighted by Points)",
+       x = "PlusMinus",
+       y = "Salary",
+       size = "High Points") +
+  theme_minimal()
+
 ```
 
-Talk way more about it. 
-
+@fig-plusminus uses the plus/minus and salary to illustrate aspects beside scoring. Plus/minus may be a better measure than goals, assists or points as it includes defense, which the other statistics do not. However, can still measure if your team produces offense when they are on the ice. Plus/minus is also a better measure of deference man as preventing goals is more important for defense, than scoring goals. This graph emphasizes players with more than 75 points. We can see that the majority of the players with more than 75 points also have a positive plus/minus. It also shows a number of players with high plus/minus are not top scorers as the top 3 players in plus/minus, have less than 75 points. 
 
 
 # Model
@@ -84,16 +98,26 @@ Here we briefly describe the Bayesian analysis model used to investigate... Back
 ## Model set-up
 
 Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
+``` {=tex}
+\[
+\text{Salary}_i | \mu_i, \sigma \sim \text{Normal}(\mu_i, \sigma)
+\]
+\[
+\mu_i = \alpha + \beta_{\text{Points}} \times \text{Points}_i + \beta_{\text{PlusMinus}} \times \text{PlusMinus}_i + \beta_{\text{PointsPerGame}} \times \text{PointsPerGame}_i
+\]
+\[
+\alpha \sim \text{Normal}(0, 2.5)
+\]
+\[
+\beta_{\text{Points}}, \beta_{\text{PlusMinus}}, \beta_{\text{PointsPerGame}} \sim \text{Normal}(0, 2.5)
+\]
+\[
+\sigma \sim \text{Exponential}(1)
+\]
+```
+In this representation, \( \text{Salary}_i \) represents the salary of player \( i \), \( \text{Points}_i \), \( \text{PlusMinus}_i \), and \( \text{PointsPerGame}_i \) represent the points, plus-minus, and points per game of player \( i \) respectively, and \( \alpha \), \( \beta_{\text{Points}} \), \( \beta_{\text{PlusMinus}} \), and \( \beta_{\text{PointsPerGame}} \) represent the intercept and coefficients for these variables, respectively. 
 
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
-
+  
 We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
 
 

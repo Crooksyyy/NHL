@@ -15,24 +15,50 @@ library(arrow)
 #### Read data ####
 analysis_data <- read_parquet(file = "data/analysis_data/analysis_data.parquet")
 
-analysis_data |>
-  ggplot(aes(x = certainty, y = outcome)) +
-  geom_jitter(height = 0)
 
 
-### Model data ####
-first_model <-
-  stan_glm(
-    formula = outcome ~ certainty,
-    data = analysis_data,
-    family = binomial(link = "logit"),
-    prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
-    prior_intercept = normal(location = 0, scale = 2.5, autoscale = TRUE),
-    prior_aux = exponential(rate = 1, autoscale = TRUE),
-    seed = 853
-  )
 
-summary(first_model)
+# Model data
+first_model <- stan_glm(
+  formula = Salary ~ Points,
+  data = analysis_data,
+  family = gaussian(link = "identity"),
+  prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
+  prior_intercept = normal(location = 0, scale = 2.5, autoscale = TRUE),
+  prior_aux = exponential(rate = 1, autoscale = TRUE),
+  seed = 93
+)
+
+second_model <- stan_glm(
+  formula = CapHit ~ Points,
+  data = analysis_data,
+  family = gaussian(link = "identity"),
+  prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
+  prior_intercept = normal(location = 0, scale = 2.5, autoscale = TRUE),
+  prior_aux = exponential(rate = 1, autoscale = TRUE),
+  seed = 93
+)
+
+third_model <- stan_glm(
+  formula = Salary ~ PointsPerGame,
+  data = analysis_data,
+  family = gaussian(link = "identity"),
+  prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
+  prior_intercept = normal(location = 0, scale = 2.5, autoscale = TRUE),
+  prior_aux = exponential(rate = 1, autoscale = TRUE),
+  seed = 93
+)
+
+# Model data
+fourth_model <- stan_glm(
+  formula = Salary ~ Points + PlusMinus + PointsPerGame,
+  data = analysis_data,
+  family = gaussian(link = "identity"),
+  prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
+  prior_intercept = normal(location = 0, scale = 2.5, autoscale = TRUE),
+  prior_aux = exponential(rate = 1, autoscale = TRUE),
+  seed = 93
+)
 
 #### Save model ####
 saveRDS(
@@ -40,3 +66,17 @@ saveRDS(
   file = "models/first_model.rds"
 )
 
+saveRDS(
+  second_model,
+  file = "models/second_model.rds"
+)
+
+saveRDS(
+  third_model,
+  file = "models/third_model.rds"
+)
+
+saveRDS(
+  fourth_model,
+  file = "models/fourth_model.rds"
+)
