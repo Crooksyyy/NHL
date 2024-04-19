@@ -2,7 +2,11 @@
 
 ## Overview
 
-This project aims to analyze NHL (National Hockey League) players and their contracts. By delving into various aspects such as player performance and salary cap implications. This analysis seeks to provide insights into the economics and dynamics of NHL player contracts.
+Welcome to the NHL Player Contract Analysis Repo!
+
+This repo focuses on examining NHL player contracts, specifically exploring the relationship between player performance and salary cap implications. Through detailed analysis of player statistics and contract data, we aim to gain insights into the economics and dynamics of NHL player contracts.
+
+By employing statistical analysis and modeling techniques, our goal is to provide a better understanding of the factors that drive player valuations and salary determinations in the NHL. We hope that our findings will offer practical insights for teams, players, and fans interested in understanding the complexities of NHL player contracts.
 
 
 ## File Structure
