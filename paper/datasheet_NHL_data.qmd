@@ -6,9 +6,7 @@ author:
 thanks: "Code and data are available at:https://github.com/Crooksyyy/NHL-Player-Evaluation"
 date: "`r Sys.time()`"
 date-format: "D MMMM YYYY"
-abstract: "**Abstract:**
-
-The NHL Player Evaluation Dataset, compiled by Gavin Crooks, offers insights into the performance and contract details of 448 top-performing NHL skaters during the 2023-24 season. Derived from reputable sources like the NHL website and Hockey-Reference, the dataset enables analysis of player value based on statistics. While it presents opportunities for tasks such as performance prediction and salary estimation, users must exercise caution to avoid unfair treatment and protect player privacy. Transparency and ethical considerations are crucial for responsible analysis, ensuring the dataset's integrity and reliability for research in professional sports."
+abstract: " The NHL Player Evaluation Dataset, compiled by Gavin Crooks, offers insights into the performance and contract details of 448 top-performing NHL skaters during the 2023-24 season. Derived from reputable sources like the NHL website and Hockey-Reference, the dataset enables analysis of player value based on statistics. While it presents opportunities for tasks such as performance prediction and salary estimation, users must exercise caution to avoid unfair treatment and protect player privacy. Transparency and ethical considerations are crucial for responsible analysis, ensuring the dataset's integrity and reliability for research in professional sports."
 format: pdf
 number-sections: true
 bibliography: references.bib
